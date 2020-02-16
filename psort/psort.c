@@ -12,10 +12,15 @@
 #include "barrier.h"
 #include "utils.h"
 
+int cmp (const void *x, const void *y) {
+   return ( *(int*)x - *(int*)y );
+}
+
 void
 qsort_floats(floats* xs)
 {
     // TODO: man 3 qsort ?
+    //qsort()
 }
 
 floats*
@@ -80,16 +85,22 @@ main(int argc, char* argv[])
     struct stat s;
     if(fstat(fd,&s)<0)
 	return -1;
-    size_t size = s.st_size;
+    size_t fsize = s.st_size;
 
-    void* file = mmap(0 ,size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0); // TODO: Use mmap for I/O 
-    printf("num: %c\n",*file);
+    void* file = mmap(0 ,fsize, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0); // TODO: Use mmap for I/O 
 
-    long count = 0; // TODO: this is in the file
-    float* data = 0; // TODO: this is in the file
+    long count = *(long*)file; // TODO: this is in the file
+    float* data = (float*)(file+8); // TODO: this is in the file
+
+    floats* fnum;
+    fnum = make_floats(0);
+    int i=0;
+    for(i=0;i<count;i++,data++)
+	    floats_push(fnum,*data);
+    floats_print(fnum);
 
     long sizes_bytes = P * sizeof(long);
-    long* sizes = malloc(sizes_bytes); // TODO: This should be shared memory.
+    long* sizes = mmap(0, sizes_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, -1, 0); // TODO: This should be shared memory.
 
     barrier* bb = make_barrier(P);
 
@@ -98,7 +109,8 @@ main(int argc, char* argv[])
     free_barrier(bb);
 
     // TODO: Clean up resources.
-    (void) file;
+    munmap(file,fsize);
+    munmap(sizes,sizes_bytes);
 
     return 0;
 }
