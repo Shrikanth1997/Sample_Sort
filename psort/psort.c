@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -7,6 +8,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
+#include <time.h>
 
 #include "float_vec.h"
 #include "barrier.h"
@@ -20,14 +22,36 @@ void
 qsort_floats(floats* xs)
 {
     // TODO: man 3 qsort ?
-    //qsort()
+    qsort(xs->data,xs->size,sizeof(int),cmp);
 }
 
 floats*
 sample(float* data, long size, int P)
 {
     // TODO: Randomly sample 3*(P-1) items from the input data.
-    return (floats*) -1;
+    int i,j;
+    int sample_size = 3 * (P-1);
+    floats* rand_items;
+    floats* samples;
+    
+    //Get the 3*P-1 items into an array and sort it
+    rand_items = make_floats(0);
+    for(i=0;i<sample_size;i++,data++){
+	floats_push(rand_items,*(data));
+    }
+    qsort_floats(rand_items);
+    floats_print(rand_items);
+
+    //Get the samples of this array by taking the median of this array
+    samples = make_floats(0);
+    floats_push(samples,0);
+    for(j=1;j<sample_size;j+=2){
+	floats_push(samples, *(rand_items->data + j));
+    }
+    floats_push(samples,INT_MAX);
+    floats_print(samples);
+    
+    return (samples);
 }
 
 void
@@ -60,9 +84,19 @@ void
 sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
 {
     // TODO: Sequentially sample the input data.
-    //
+   /*int i,j;
+   for(i=0,j=0;i<size;i++,j++,data++){
+	printf("sort check pos: %d data: %f\n",j,*data);
+    }*/
+
+    floats* samples;
+    samples = make_floats(0);
+    samples = sample(data,size,P);
+    floats_print(samples);
+
     // TODO: Sort the input data using the sampled array to allocate work
     // between parallel processes.
+    run_sort_workers(data,size,P,samples,sizes,bb);
 }
 
 int
@@ -92,6 +126,8 @@ main(int argc, char* argv[])
     long count = *(long*)file; // TODO: this is in the file
     float* data = (float*)(file+8); // TODO: this is in the file
 
+    float* cpy = data;
+
     floats* fnum;
     fnum = make_floats(0);
     int i=0;
@@ -104,6 +140,13 @@ main(int argc, char* argv[])
 
     barrier* bb = make_barrier(P);
 
+    /*int j;
+    for(i=0,j=0;i<count;i++,j++,data++){
+	printf("pos: %d data: %f\n",j,*data);
+    }*/
+
+    data=cpy;
+    
     sample_sort(data, count, P, sizes, bb);
 
     free_barrier(bb);
