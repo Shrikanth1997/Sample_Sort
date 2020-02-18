@@ -57,6 +57,7 @@ sample(float* data, long size, int P)
 void
 sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes, barrier* bb)
 {
+    
     //floats* xs = malloc(sizeof(floats));
     floats* xs;
     xs = make_floats(0);
@@ -95,13 +96,21 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     printf("start: %ld end:  %ld\n", start,end);
     // TODO: Copy the local array to the appropriate place in the global array.
     int j=0;
-    for(i = start,j=0; i<end ;i++,j++){
-	data[i]= 0;
+
+    for(i=start,j=0; i<end ;j++,i++){
+	data[i]= xs->data[j];
+	printf("xs: %f ",xs->data[j]);
+	
     }
-    
+    printf("\n");
+    for(i=0;i<size;i++)
+	printf("%.04f ",data[i]);
+    printf("\n\n");
+   
 
     // TODO: Make sure this function doesn't have any data races.
     barrier_wait(bb);
+    
 }
 
 void
@@ -116,8 +125,9 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
 	}
     }
     // TODO: Once all P processes have been started, wait for them all to finish.
-    for(i=0;i<P;i++)
+    for(i=P-1;i>=0;i--)
 	wait(NULL);
+
 }
 
 void
@@ -128,6 +138,7 @@ sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
    for(i=0,j=0;i<size;i++,j++,data++){
 	printf("sort check pos: %d data: %f\n",j,*data);
     }*/
+
 
     floats* samples;
     samples = make_floats(0);
