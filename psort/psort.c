@@ -45,7 +45,7 @@ sample(float* data, long size, int P)
     //Get the samples of this array by taking the median of this array
     samples = make_floats(0);
     floats_push(samples,0);
-    for(j=1;j<sample_size;j+=2){
+    for(j=1;j<rand_items->size;j+=3){
 	floats_push(samples, *(rand_items->data + j));
     }
     floats_push(samples,INT_MAX);
@@ -57,16 +57,28 @@ sample(float* data, long size, int P)
 void
 sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes, barrier* bb)
 {
-    floats* xs = malloc(sizeof(floats));
-
+    //floats* xs = malloc(sizeof(floats));
+    floats* xs;
+    xs = make_floats(0);
+    long i=0;
     // TODO: Copy the data for our partition into a locally allocated array.
+    for(i=0;i<size;i++){
+    	if(data[i] > samps->data[pnum] && data[i]<samps->data[pnum+1]){
+		floats_push(xs,data[i]);
+	}
+    }
     printf("%d: start %.04f, count %ld\n", pnum, samps->data[pnum], xs->size);
-
     // TODO: Sort the local array.
-
+    qsort_floats(xs);
+    sizes[pnum] = xs->size;
     // TODO: Using the shared sizes array, determine where the local
     // output goes in the global data array.
-
+    long start=0,end=0;
+    for(i = 0;i<=pnum-1;i++)
+	start+=sizes[i];
+    for(i = 0;i<=pnum;i++)
+	end+=sizes[i];
+    printf("start: %ld end:  %ld\n", start,end);
     // TODO: Copy the local array to the appropriate place in the global array.
 
     // TODO: Make sure this function doesn't have any data races.
@@ -76,8 +88,16 @@ void
 run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barrier* bb)
 {
     // TODO: Spawn P processes running sort_worker
-    //
+    int i=0;
+    for(i=0;i<P;i++){
+	if(fork()==0){
+		sort_worker(i,data,size,P,samps,sizes,bb);
+		exit(0);
+	}
+    }
     // TODO: Once all P processes have been started, wait for them all to finish.
+    for(i=0;i<P;i++)
+	wait(NULL);
 }
 
 void
