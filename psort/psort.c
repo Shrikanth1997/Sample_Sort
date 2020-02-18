@@ -66,31 +66,42 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     	if(data[i] > samps->data[pnum] && data[i]<samps->data[pnum+1]){
 		floats_push(xs,data[i]);
 	}
+        else if(data[i] == samps->data[pnum+1])
+		floats_push(xs,data[i]);
     }
     printf("%d: start %.04f, count %ld\n", pnum, samps->data[pnum], xs->size);
     // TODO: Sort the local array.
     qsort_floats(xs);
-    //printf("%d: before size %ld, count %ld\n", pnum, sizes[pnum], xs->size);
+    floats_print(xs);
     sizes[pnum] = xs->size;
     
+    for(i=0;i<P;i++)
+	printf("sizes: %ld ",sizes[i]);
+    printf("\n");
     // TODO: Using the shared sizes array, determine where the local
     // output goes in the global data array.
     long start=0,end=0;
     i=0;
-    do{
+    while(i<=pnum-1){
 	start+=sizes[i];
 	i++;
-    }while(i<pnum);
+    }
     
     i = 0;
-    do{
+    while(i<=pnum){
 	end+=sizes[i];
 	i++;
-    }while(i<=pnum);
+    }
     printf("start: %ld end:  %ld\n", start,end);
     // TODO: Copy the local array to the appropriate place in the global array.
+    int j=0;
+    for(i = start,j=0; i<end ;i++,j++){
+	data[i]= 0;
+    }
+    
 
     // TODO: Make sure this function doesn't have any data races.
+    barrier_wait(bb);
 }
 
 void
@@ -98,7 +109,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
 {
     // TODO: Spawn P processes running sort_worker
     int i=0;
-    for(i=0;i<P;i++){
+    for(i=P-1;i>=0;i--){
 	if(fork()==0){
 		sort_worker(i,data,size,P,samps,sizes,bb);
 		exit(0);
@@ -155,13 +166,12 @@ main(int argc, char* argv[])
     long count = *(long*)file; // TODO: this is in the file
     float* data = (float*)(file+8); // TODO: this is in the file
 
-    float* cpy = data;
 
     floats* fnum;
     fnum = make_floats(0);
     int i=0;
-    for(i=0;i<count;i++,data++)
-	    floats_push(fnum,*data);
+    for(i=0;i<count;i++)
+	    floats_push(fnum,data[i]);
     floats_print(fnum);
 
     long sizes_bytes = P * sizeof(long);
@@ -174,10 +184,13 @@ main(int argc, char* argv[])
 	printf("pos: %d data: %f\n",j,*data);
     }*/
 
-    data=cpy;
     
     sample_sort(data, count, P, sizes, bb);
 
+    for(i=0;i<count;i++)
+	printf("%.04f ",data[i]);
+    printf("\n");
+    
     free_barrier(bb);
 
     // TODO: Clean up resources.
