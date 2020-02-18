@@ -42,7 +42,7 @@ sample(float* data, long size, int P)
 	floats_push(rand_items,data[j]);
     }
     qsort_floats(rand_items);
-    floats_print(rand_items);
+    //floats_print(rand_items);
 
     //Get the samples of this array by taking the median of this array
     samples = make_floats(0);
@@ -51,7 +51,7 @@ sample(float* data, long size, int P)
 	floats_push(samples, rand_items->data[j]);
     }
     floats_push(samples,INT_MAX);
-    floats_print(samples);
+    //floats_print(samples);
     
     return (samples);
 }
@@ -69,18 +69,17 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     	if(data[i] > samps->data[pnum] && data[i]<=samps->data[pnum+1]){
 		floats_push(xs,data[i]);
 	}
-        //else if(data[i] == samps->data[pnum+1])
-	//	floats_push(xs,data[i]);
     }
     printf("%d: start %.04f, count %ld\n", pnum, samps->data[pnum], xs->size);
     // TODO: Sort the local array.
     qsort_floats(xs);
-    floats_print(xs);
+    //floats_print(xs);
     sizes[pnum] = xs->size;
     
-    for(i=0;i<P;i++)
+    /*for(i=0;i<P;i++)
 	printf("sizes: %ld ",sizes[i]);
-    printf("\n");
+    printf("\n");*/
+
     // TODO: Using the shared sizes array, determine where the local
     // output goes in the global data array.
     long start=0,end=0;
@@ -95,27 +94,28 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
 	end+=sizes[i];
 	i++;
     }
-    printf("start: %ld end:  %ld\n", start,end);
+    //printf("start: %ld end:  %ld\n", start,end);
    
-
     barrier_wait(bb);
+
     // TODO: Copy the local array to the appropriate place in the global array.
     int j=0;
 
     for(i=start,j=0; i<end ;j++,i++){
 	data[i]= xs->data[j];
-	printf("xs: %f ",xs->data[j]);
+	//printf("xs: %f ",xs->data[j]);
 	
     }
     
+    /*
     printf("\n");
     for(i=0;i<size;i++)
 	printf("%.04f ",data[i]);
     printf("\n\n");
-   
+    */
 
     // TODO: Make sure this function doesn't have any data races.
-    
+    barrier_wait(bb); 
 }
 
 void
@@ -148,7 +148,7 @@ sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
     floats* samples;
     samples = make_floats(0);
     samples = sample(data,size,P);
-    floats_print(samples);
+    //floats_print(samples);
 
     // TODO: Sort the input data using the sampled array to allocate work
     // between parallel processes.
@@ -188,7 +188,7 @@ main(int argc, char* argv[])
     int i=0;
     for(i=0;i<count;i++)
 	    floats_push(fnum,data[i]);
-    floats_print(fnum);
+    //floats_print(fnum);
 
     long sizes_bytes = P * sizeof(long);
     long* sizes = mmap(0, sizes_bytes, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0); // TODO: This should be shared memory.
@@ -202,10 +202,12 @@ main(int argc, char* argv[])
 
     sample_sort(data, count, P, sizes, bb);
 
+    /*
     for(i=0;i<count;i++)
 	printf("%.04f ",data[i]);
     printf("\n");
-    
+    */    
+
     free_barrier(bb);
 
     // TODO: Clean up resources.
