@@ -70,14 +70,23 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     printf("%d: start %.04f, count %ld\n", pnum, samps->data[pnum], xs->size);
     // TODO: Sort the local array.
     qsort_floats(xs);
+    //printf("%d: before size %ld, count %ld\n", pnum, sizes[pnum], xs->size);
     sizes[pnum] = xs->size;
+    
     // TODO: Using the shared sizes array, determine where the local
     // output goes in the global data array.
     long start=0,end=0;
-    for(i = 0;i<=pnum-1;i++)
+    i=0;
+    do{
 	start+=sizes[i];
-    for(i = 0;i<=pnum;i++)
+	i++;
+    }while(i<pnum);
+    
+    i = 0;
+    do{
 	end+=sizes[i];
+	i++;
+    }while(i<=pnum);
     printf("start: %ld end:  %ld\n", start,end);
     // TODO: Copy the local array to the appropriate place in the global array.
 
@@ -156,7 +165,7 @@ main(int argc, char* argv[])
     floats_print(fnum);
 
     long sizes_bytes = P * sizeof(long);
-    long* sizes = mmap(0, sizes_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, -1, 0); // TODO: This should be shared memory.
+    long* sizes = mmap(0, sizes_bytes, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0); // TODO: This should be shared memory.
 
     barrier* bb = make_barrier(P);
 
