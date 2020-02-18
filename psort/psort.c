@@ -34,10 +34,12 @@ sample(float* data, long size, int P)
     floats* rand_items;
     floats* samples;
     
-    //Get the 3*P-1 items into an array and sort it
+    srand(time(NULL)); 
+    //Get the 3*P-1 random items into an array and sort it
     rand_items = make_floats(0);
-    for(i=0;i<sample_size;i++,data++){
-	floats_push(rand_items,*(data));
+    for(i=0;i<sample_size;i++){
+        j = rand() % sample_size;
+	floats_push(rand_items,data[j]);
     }
     qsort_floats(rand_items);
     floats_print(rand_items);
@@ -102,6 +104,7 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
 	printf("xs: %f ",xs->data[j]);
 	
     }
+    
     printf("\n");
     for(i=0;i<size;i++)
 	printf("%.04f ",data[i]);
@@ -121,6 +124,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
     for(i=P-1;i>=0;i--){
 	if(fork()==0){
 		sort_worker(i,data,size,P,samps,sizes,bb);
+		barrier_wait(bb);
 		exit(0);
 	}
     }
@@ -172,7 +176,7 @@ main(int argc, char* argv[])
 	return -1;
     size_t fsize = s.st_size;
 
-    void* file = mmap(0 ,fsize, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0); // TODO: Use mmap for I/O 
+    void* file = mmap(0 ,fsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // TODO: Use mmap for I/O 
 
     long count = *(long*)file; // TODO: this is in the file
     float* data = (float*)(file+8); // TODO: this is in the file
@@ -195,7 +199,6 @@ main(int argc, char* argv[])
 	printf("pos: %d data: %f\n",j,*data);
     }*/
 
-    
     sample_sort(data, count, P, sizes, bb);
 
     for(i=0;i<count;i++)
