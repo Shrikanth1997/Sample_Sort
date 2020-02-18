@@ -7,8 +7,10 @@
 #include <pthread.h>
 
 typedef struct barrier {
-    float wrong_field;  // TODO: make a barrier
-                        // TODO: use mutexes and condvars
+    pthread_mutex_t  barrier;
+    pthread_mutex_t mutex;
+    int count;
+    int seen;                 
 } barrier;
 
 barrier* make_barrier(int nn);
