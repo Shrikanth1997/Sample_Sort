@@ -38,7 +38,15 @@ void print_worker(struct worker x){
 
 
 int cmp (const void *x, const void *y) {
-   return ( *(int*)x - *(int*)y );
+   float a = *(float*)x;
+   float b = *(float*)y;
+
+   if(a<b)
+	return -1;
+   else if (a==b)
+	return 0;
+   else
+	return 1;
 }
 
 void
@@ -99,7 +107,7 @@ sort_worker(void* args) //int pnum, float* data, long size, int P, floats* samps
     long i=0;
     // TODO: Copy the data for our partition into a locally allocated array.
     for(i=0;i<size;i++){
-    	if(data[i] > samps->data[pnum] && data[i]<=samps->data[pnum+1]){
+    	if(data[i] >= samps->data[pnum] && data[i]<samps->data[pnum+1]){
 		floats_push(xs,data[i]);
 	}
     }
@@ -129,7 +137,7 @@ sort_worker(void* args) //int pnum, float* data, long size, int P, floats* samps
 	end+=sizes[i];
 	i++;
     }
-   // printf("start: %ld end:  %ld\n", start,end);
+   //printf("start: %ld end:  %ld\n", start,end);
    
     barrier_wait(bb);
 
@@ -169,16 +177,15 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
     
     //print_worker(arg);
     int i=0;
-    for(i=P-1;i>=0;i--){
+    for(i=0;i<P;i++){
 		int *id = (int *)malloc(sizeof(int));
 		*id = i;
 		arg.pnum = id;
 		pthread_create(&tid[i],NULL,sort_worker,id);
 		
     }
-    free(id);
     // TODO: Once all P threads have been started, wait for them all to finish.
-    for(i=P-1;i>=0;i--)
+    for(i=0;i<P;i++)
 	pthread_join(tid[i],NULL);
 
 }
@@ -261,10 +268,7 @@ main(int argc, char* argv[])
     // TODO: Clean up resources.
     munmap(file,fsize);
     munmap(sizes,sizes_bytes);
-    floats_free(fnum);
-    floats_free(samples);
-    floats_free(xs);
-    floats_free(rand_items);
+    free_floats(fnum);
 
 
     return 0;

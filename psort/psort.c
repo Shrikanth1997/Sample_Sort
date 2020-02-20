@@ -15,7 +15,15 @@
 #include "utils.h"
 
 int cmp (const void *x, const void *y) {
-   return ( *(int*)x - *(int*)y );
+   float a = *(float*)x;
+   float b = *(float*)y;
+
+   if(a<b)
+	return -1;
+   else if (a==b)
+	return 0;
+   else
+	return 1;
 }
 
 void
