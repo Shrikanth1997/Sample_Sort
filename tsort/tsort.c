@@ -22,7 +22,8 @@ struct worker{
 	floats* samps;
  	long* sizes; 
 	barrier* bb;
-};
+}arg;
+
 
 void print_worker(struct worker x){
 	printf("pnum: %d\n",*x.pnum);
@@ -81,14 +82,16 @@ sample(float* data, long size, int P)
 void*
 sort_worker(void* args) //int pnum, float* data, long size, int P, floats* samps, long* sizes, barrier* bb
 {
-    struct worker t = *((struct worker *)args); 
-    int pnum = *(t.pnum);
+    //struct worker t = *((struct worker *)args); 
+    struct worker t = arg; 
+    //int pnum = *(t.pnum);
+    int pnum = *((int *)args);
     float* data = t.data;
     long size = t.size;
     int P = t.P;
     floats* samps = t.samps;
     long* sizes = t.sizes;
-    //barrier* bb = t.bb;
+    barrier* bb = t.bb;
     
     //floats* xs = malloc(sizeof(floats));
     floats* xs;
@@ -126,7 +129,7 @@ sort_worker(void* args) //int pnum, float* data, long size, int P, floats* samps
     }
     printf("start: %ld end:  %ld\n", start,end);
    
-    //barrier_wait(bb);
+    barrier_wait(bb);
 
     // TODO: Copy the local array to the appropriate place in the global array.
     int j=0;
@@ -154,8 +157,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
 {
     // TODO: Spawn P threads running sort_worker
     pthread_t tid[P];
-    
-    struct worker arg;
+
     arg.data = data;
     arg.size = size;
     arg.P = P;
@@ -169,8 +171,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
 		int *id = (int *)malloc(sizeof(int));
 		*id = i;
 		arg.pnum = id;
-		printf("THREAD: %d\n\n",*arg.pnum);
-		pthread_create(&tid[i],NULL,sort_worker,&arg);
+		pthread_create(&tid[i],NULL,sort_worker,id);
 		
     }
     // TODO: Once all P threads have been started, wait for them all to finish.
@@ -221,8 +222,8 @@ main(int argc, char* argv[])
 	return -1;
     size_t fsize = s.st_size;
 
-    //void* file = mmap(0 ,fsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // TODO: Use mmap for I/O 
-    void* file = mmap(0 ,fsize, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0); // TODO: Use mmap for I/O 
+    void* file = mmap(0 ,fsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // TODO: Use mmap for I/O 
+    //void* file = mmap(0 ,fsize, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0); // TODO: Use mmap for I/O 
 
     long count = *(long*)file; // TODO: this is in the file
     float* data = (float*)(file+8); // TODO: this is in the file

@@ -20,18 +20,20 @@ make_barrier(int nn)
 
     rv = pthread_mutex_init(&(bb->barrier), NULL);
     if (rv == -1) {
-        perror("sem_init(barrier)");
+        perror("mutex_init(barrier)");
         abort();
     }
 
-    pthread_mutex_init(&(bb->mutex), NULL);
+    rv = pthread_mutex_init(&(bb->mutex), NULL);
     if (rv == -1) {
-        perror("sem_init(mutex)");
+        perror("mutex_init(mutex)");
         abort();
     }
+ 
+    pthread_cond_init(&(bb->condv),NULL);
 
     bb->count = nn;
-    bb->seen  = 0;
+    bb->seen  = nn;
     return bb;
 }
 
@@ -42,32 +44,32 @@ barrier_wait(barrier* bb)
 
     rv = pthread_mutex_lock(&(bb->mutex));
     if (rv == -1) {
-        perror("sem_wait(mutex)");
+        perror("lock(mutex)");
         abort();
     }
 
-    bb->seen += 1;
+    bb->seen--;
     int seen = bb->seen;
 
     rv = pthread_mutex_unlock(&(bb->mutex));
     if (rv == -1) {
-        perror("sem_post(mutex)");
+        perror("unlock(mutex)");
         abort();
     }
 
-    if (seen >= bb->count) {
-        for (int ii = 0; ii < bb->count; ++ii) {
-            rv = pthread_mutex_unlock(&(bb->barrier));
-            if (rv == -1) {
-                perror("sem_post(barrier1)");
-                abort();
-            }
-        }
+    pthread_mutex_lock(&(bb->barrier));
+    //bb->seen -= 1;
+    //int seen = bb->seen;
+    if(seen == 0)
+  	pthread_cond_broadcast(&(bb->condv));
+    else{
+    	//while(seen != 0)
+		pthread_cond_wait(&(bb->condv),&(bb->barrier));
     }
 
-    rv = pthread_mutex_lock(&(bb->barrier));
+    rv = pthread_mutex_unlock(&(bb->barrier));
     if (rv == -1) {
-        perror("sem_wait(barrier)");
+        perror("wait(barrier)");
         abort();
     }
 }

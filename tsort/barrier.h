@@ -9,6 +9,7 @@
 typedef struct barrier {
     pthread_mutex_t  barrier;
     pthread_mutex_t mutex;
+    pthread_cond_t condv;
     int count;
     int seen;                 
 } barrier;
