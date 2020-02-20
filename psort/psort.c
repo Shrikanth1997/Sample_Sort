@@ -155,9 +155,9 @@ sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
     }*/
 
 
-    floats* samples;
-    samples = make_floats(0);
-    samples = sample(data,size,P);
+    //floats* samples;
+    //samples = make_floats(0);
+    floats* samples = sample(data,size,P);
     //floats_print(samples);
 
     // TODO: Sort the input data using the sampled array to allocate work
@@ -225,7 +225,7 @@ main(int argc, char* argv[])
     // TODO: Clean up resources.
     munmap(file,fsize);
     munmap(sizes,sizes_bytes);
-    floats_free(fnum);
+    free_floats(fnum);
 
     return 0;
 }

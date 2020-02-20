@@ -177,7 +177,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
     arg.bb = bb;
     
     //print_worker(arg);
-    int i=0,*id;
+    int i=0,*id=0;
     for(i=0;i<P;i++){
 		id = (int *)malloc(sizeof(int));
 		*id = i;
@@ -201,9 +201,9 @@ sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
     }*/
 
 
-    floats* samples;
-    samples = make_floats(0);
-    samples = sample(data,size,P);
+    //floats* samples;
+    //samples = make_floats(0);
+    floats* samples = sample(data,size,P);
     //floats_print(samples);
 
     // TODO: Sort the input data using the sampled array to allocate work

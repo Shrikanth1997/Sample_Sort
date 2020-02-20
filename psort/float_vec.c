@@ -52,9 +52,3 @@ floats_print(floats* xs)
     printf("\n");
 }
 
-void
-floats_free(floats* xs)
-{
-   free(xs);
-   free(xs->data);
-}
