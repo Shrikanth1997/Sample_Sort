@@ -30,7 +30,7 @@ void
 qsort_floats(floats* xs)
 {
     // TODO: man 3 qsort ?
-    qsort(xs->data,xs->size,sizeof(int),cmp);
+    qsort(xs->data,xs->size,sizeof(float),cmp);
 }
 
 floats*
@@ -140,7 +140,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
 	}
     }
     // TODO: Once all P processes have been started, wait for them all to finish.
-    //for(i=P-1;i>=0;i--)
+    for(i=P-1;i>=0;i--)
 	wait(NULL);
 
 }

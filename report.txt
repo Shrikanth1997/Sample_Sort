@@ -1,0 +1,87 @@
+Local Machine:-
+OS: 		Debian GNU/Linux 10 (buster)
+Processor:	Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
+Num Cores:	8
+RAM:		16 GB
+
+CCIS Machine:-
+OS: 		CentOS Linux
+Processor:	Intel(R) Xeon(R) Gold 5118 CPU @ 2.30GHz
+Num Cores:	48
+RAM:		192 GB
+
+__________________________________________________________
+      Test      |Result(s)|Parallel Speedup|Ideal Speedup |
+________________|_________|________________|______________|
+                |         |                |              |
+Local 1 Process | 22.886  |        1       |      1       |	 	
+                |         |                |              |
+Local 4 Process | 10.248  |     2.233      |      4       |
+                |         |                |              |
+Local 8 Process | 7.202   |     3.177      |      8       |
+                |         |                |              |
+CCIS 1 Process  | 16.62   |        1       |      1       |
+                |         |                |              |
+CCIS 4 Process  | 11.59   |      1.433     |      4       |
+                |         |                |              |
+CCIS 8 Process  | 7.743   |      2.146     |      8       |
+                |         |                |              | 
+CCIS 1 Thread   | 16.114  |        1       |      1       |
+                |         |                |              |
+CCIS 4 Thread   | 7.802   |      2.065     |      4       |
+                |         |                |              |
+CCIS 8 Thread   | 6.755   |      2.385     |      8       |
+________________|_________|________________|______________|
+
+Analysis:
+We see that the parallel speedup is nowhere near the ideal 
+speedup this is mainly because the overhead of creating 
+threads and then joining all of them, also taking care of
+locking, synchronizing, using barriers all cause a loss in
+time and resources which degrade the actual parallel 
+performance.
+
+Also in sample sort we cannot guarantee that each thread
+or process will contain equal amount of work as the samples
+are chosen in random which makes few processes or threads 
+just wait idly until the others are done which is a waste
+of resources, these threads or processes could be used
+for other tasks but there's a risk of losing the data.
+
+Which performs better, threads or processes? By how much? 
+Why?:
+We see that threads in the CCIS server performed better
+than processes but not by much, this could be because there 
+is no need to worry about context switches and shared memory 
+as muchas in threads, processes share memory and this brings 
+inextra security and sync to prevent data races which costs
+time.
+
+Amdahl's Law and Gustafson law:
+Amdahl states that there is a limit to the amount of 
+parallel speedup you can achieve due to the precesence 
+of a serial part in the program.
+Gustafson stated that the limit does exist but the 
+serial part can be suppressed by adding a greater 
+workload that can exploit the parallelism and make
+it look like the time taken for the entire program 
+involved only the serial part.
+
+Is sample sort a good algorithm?
+It's an average performing algorithm. The good stuff it
+does is to partition the program into pieces that each 
+thread can work but as these pieces are chosen in random 
+some threads do more work than others. Equal distribution 
+is not achieved which could enhance performance and 
+improve utilization of resources. But the main idea
+of divide and conquer works very well for any parallel
+algorithm and this one scales up pretty mediocre.
+
+More than 3*(P-1) samples:
+I ran for 63*(P-1) samples, and foud out the parallel 
+speedup slightlly increased that's all but this was for
+50 million, but if this test was done for a small number
+like say 1000 then parallel speedup would have been higher
+because doing serial work for smaller workloads is better
+as the time taken for creating threads or processes will
+mask this time and result in higher execution time

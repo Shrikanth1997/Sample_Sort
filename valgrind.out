@@ -1,6 +1,12 @@
-==3444== 4 bytes in 1 blocks are definitely lost in loss record 1 of 1
-==3444==    at 0x483577F: malloc (vg_replace_malloc.c:299)
-==3444==    by 0x109A79: run_sort_workers (tsort.c:182)
-==3444==    by 0x109B6F: sample_sort (tsort.c:211)
-==3444==    by 0x109D4C: main (tsort.c:260)
-==3444== 
+==5147== 4 bytes in 1 blocks are definitely lost in loss record 2 of 4
+==5147==    at 0x483577F: malloc (vg_replace_malloc.c:299)
+==5147==    by 0x109A79: run_sort_workers (tsort.c:182)
+==5147==    by 0x109B71: sample_sort (tsort.c:210)
+==5147==    by 0x109D4E: main (tsort.c:259)
+==5147== 
+==5147== 32 (24 direct, 8 indirect) bytes in 1 blocks are definitely lost in loss record 4 of 4
+==5147==    at 0x483577F: malloc (vg_replace_malloc.c:299)
+==5147==    by 0x10930A: make_floats (float_vec.c:20)
+==5147==    by 0x109B2E: sample_sort (tsort.c:204)
+==5147==    by 0x109D4E: main (tsort.c:259)
+==5147== 
