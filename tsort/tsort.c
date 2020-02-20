@@ -83,7 +83,7 @@ sample(float* data, long size, int P)
     }
     floats_push(samples,INT_MAX);
     //floats_print(samples);
-    
+    free_floats(rand_items); 
     return (samples);
 }
 
@@ -107,16 +107,16 @@ sort_worker(void* args) //int pnum, float* data, long size, int P, floats* samps
     long i=0;
     // TODO: Copy the data for our partition into a locally allocated array.
     for(i=0;i<size;i++){
-    	if(data[i] >= samps->data[pnum] && data[i]<samps->data[pnum+1]){
+    	if(data[i] > samps->data[pnum] && data[i]<=samps->data[pnum+1]){
 		floats_push(xs,data[i]);
 	}
     }
-    printf("%d : start %.04f, count %ld\n", pnum, samps->data[pnum], xs->size);
+    printf("%d: start %.04f, count %ld\n", pnum, samps->data[pnum], xs->size);
     // TODO: Sort the local array.
     qsort_floats(xs);
     //floats_print(xs);
     sizes[pnum] = xs->size;
-   
+    barrier_wait(bb); 
 /* 
     for(i=0;i<P;i++)
 	printf("sizes: %ld ",sizes[i]);
@@ -139,7 +139,7 @@ sort_worker(void* args) //int pnum, float* data, long size, int P, floats* samps
     }
    //printf("start: %ld end:  %ld\n", start,end);
    
-    barrier_wait(bb);
+    //barrier_wait(bb);
 
     // TODO: Copy the local array to the appropriate place in the global array.
     int j=0;
@@ -159,6 +159,7 @@ sort_worker(void* args) //int pnum, float* data, long size, int P, floats* samps
 
     // TODO: Make sure this function doesn't have any data races.
     //barrier_wait(bb);
+    free_floats(xs);
     return NULL; 
 }
 
@@ -176,9 +177,9 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
     arg.bb = bb;
     
     //print_worker(arg);
-    int i=0;
+    int i=0,*id;
     for(i=0;i<P;i++){
-		int *id = (int *)malloc(sizeof(int));
+		id = (int *)malloc(sizeof(int));
 		*id = i;
 		arg.pnum = id;
 		pthread_create(&tid[i],NULL,sort_worker,id);
@@ -187,7 +188,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
     // TODO: Once all P threads have been started, wait for them all to finish.
     for(i=0;i<P;i++)
 	pthread_join(tid[i],NULL);
-
+    free(id);
 }
 
 void
@@ -208,6 +209,7 @@ sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
     // TODO: Sort the input data using the sampled array to allocate work
     // between parallel processes.
     run_sort_workers(data,size,P,samples,sizes,bb);
+    free_floats(samples);
 }
 
 int

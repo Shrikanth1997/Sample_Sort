@@ -60,7 +60,7 @@ sample(float* data, long size, int P)
     }
     floats_push(samples,INT_MAX);
     //floats_print(samples);
-    
+    free_floats(rand_items);
     return (samples);
 }
 
@@ -74,7 +74,7 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     long i=0;
     // TODO: Copy the data for our partition into a locally allocated array.
     for(i=0;i<size;i++){
-    	if(data[i] > samps->data[pnum] && data[i]<=samps->data[pnum+1]){
+    	if((data[i] >= samps->data[pnum]) && (data[i]<samps->data[pnum+1])){
 		floats_push(xs,data[i]);
 	}
     }
@@ -83,7 +83,8 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     qsort_floats(xs);
     //floats_print(xs);
     sizes[pnum] = xs->size;
-    
+    barrier_wait(bb);   
+ 
     /*for(i=0;i<P;i++)
 	printf("sizes: %ld ",sizes[i]);
     printf("\n");*/
@@ -123,7 +124,8 @@ sort_worker(int pnum, float* data, long size, int P, floats* samps, long* sizes,
     */
 
     // TODO: Make sure this function doesn't have any data races.
-    barrier_wait(bb); 
+    //barrier_wait(bb);
+    free_floats(xs);
 }
 
 void
@@ -138,7 +140,7 @@ run_sort_workers(float* data, long size, int P, floats* samps, long* sizes, barr
 	}
     }
     // TODO: Once all P processes have been started, wait for them all to finish.
-    for(i=P-1;i>=0;i--)
+    //for(i=P-1;i>=0;i--)
 	wait(NULL);
 
 }
@@ -161,6 +163,8 @@ sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
     // TODO: Sort the input data using the sampled array to allocate work
     // between parallel processes.
     run_sort_workers(data,size,P,samples,sizes,bb);
+
+    free_floats(samples);
 }
 
 int
@@ -222,8 +226,6 @@ main(int argc, char* argv[])
     munmap(file,fsize);
     munmap(sizes,sizes_bytes);
     floats_free(fnum);
-    floats_free(xs);
-    floats_free(rand_items);
 
     return 0;
 }

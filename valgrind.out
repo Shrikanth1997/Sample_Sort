@@ -1,31 +1,12 @@
-==2630== 4 bytes in 1 blocks are definitely lost in loss record 2 of 12
-==2630==    at 0x483577F: malloc (vg_replace_malloc.c:299)
-==2630==    by 0x109A1D: run_sort_workers (tsort.c:173)
-==2630==    by 0x109B13: sample_sort (tsort.c:202)
-==2630==    by 0x109CE4: main (tsort.c:251)
-==2630== 
-==2630== 32 (24 direct, 8 indirect) bytes in 1 blocks are definitely lost in loss record 7 of 12
-==2630==    at 0x483577F: malloc (vg_replace_malloc.c:299)
-==2630==    by 0x10930A: make_floats (float_vec.c:20)
-==2630==    by 0x109AD0: sample_sort (tsort.c:196)
-==2630==    by 0x109CE4: main (tsort.c:251)
-==2630== 
-==2630== 40 (24 direct, 16 indirect) bytes in 1 blocks are definitely lost in loss record 8 of 12
-==2630==    at 0x483577F: malloc (vg_replace_malloc.c:299)
-==2630==    by 0x10930A: make_floats (float_vec.c:20)
-==2630==    by 0x1095B3: sample (tsort.c:62)
-==2630==    by 0x109AEA: sample_sort (tsort.c:197)
-==2630==    by 0x109CE4: main (tsort.c:251)
-==2630== 
-==2630== 536 (24 direct, 512 indirect) bytes in 1 blocks are definitely lost in loss record 10 of 12
-==2630==    at 0x483577F: malloc (vg_replace_malloc.c:299)
-==2630==    by 0x10930A: make_floats (float_vec.c:20)
-==2630==    by 0x109C39: main (tsort.c:235)
-==2630== 
-==2630== 592 (48 direct, 544 indirect) bytes in 2 blocks are definitely lost in loss record 12 of 12
-==2630==    at 0x483577F: malloc (vg_replace_malloc.c:299)
-==2630==    by 0x10930A: make_floats (float_vec.c:20)
-==2630==    by 0x10972A: sort_worker (tsort.c:98)
-==2630==    by 0x49E3FA2: start_thread (pthread_create.c:486)
-==2630==    by 0x4AF64CE: clone (clone.S:95)
-==2630== 
+==2987== 4 bytes in 1 blocks are definitely lost in loss record 1 of 3
+==2987==    at 0x483577F: malloc (vg_replace_malloc.c:299)
+==2987==    by 0x109A71: run_sort_workers (tsort.c:182)
+==2987==    by 0x109B75: sample_sort (tsort.c:211)
+==2987==    by 0x109D52: main (tsort.c:260)
+==2987== 
+==2987== 32 (24 direct, 8 indirect) bytes in 1 blocks are definitely lost in loss record 3 of 3
+==2987==    at 0x483577F: malloc (vg_replace_malloc.c:299)
+==2987==    by 0x10930A: make_floats (float_vec.c:20)
+==2987==    by 0x109B32: sample_sort (tsort.c:205)
+==2987==    by 0x109D52: main (tsort.c:260)
+==2987== 
