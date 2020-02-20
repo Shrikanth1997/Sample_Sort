@@ -14,5 +14,6 @@ floats* make_floats(long nn);
 void floats_push(floats* xs, float xx);
 void free_floats(floats* xs);
 void floats_print(floats* xs);
+void floats_free(floats* xs);
 
 #endif

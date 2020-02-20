@@ -213,6 +213,9 @@ main(int argc, char* argv[])
     // TODO: Clean up resources.
     munmap(file,fsize);
     munmap(sizes,sizes_bytes);
+    floats_free(fnum);
+    floats_free(xs);
+    floats_free(rand_items);
 
     return 0;
 }
