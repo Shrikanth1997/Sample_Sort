@@ -200,9 +200,9 @@ sample_sort(float* data, long size, int P, long* sizes, barrier* bb)
     }*/
 
 
-    floats* samples;
-    samples = make_floats(0);
-    samples = sample(data,size,P);
+    //floats* samples;
+    //samples = make_floats(0);
+    floats* samples = sample(data,size,P);
     //floats_print(samples);
 
     // TODO: Sort the input data using the sampled array to allocate work
